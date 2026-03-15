@@ -89,9 +89,11 @@ export interface GuitarDto {
   fretboardMaterialList: string[];
   fretboardRadius: string | null;
   numberOfFrets: number | null;
+  numberOfFretsList: number[];
   numberOfStrings: number | null;
   scaleLength: string | null;
   pickupConfiguration: string | null;
+  pickupConfigurationList: string[];
   neckPickup: string | null;
   middlePickup: string | null;
   bridgePickup: string | null;
@@ -100,6 +102,7 @@ export interface GuitarDto {
   hardwareColor: string | null;
   finishes: string[];
   countryOfOrigin: string | null;
+  countryOfOriginList: string[];
   yearsProduced: string | null;
   productionStart: number | null;
   productionEnd: number | null;

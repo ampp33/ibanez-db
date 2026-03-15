@@ -223,12 +223,23 @@ const BRIDGE_TYPE_MAP: Record<string, string> = {
 const COUNTRY_MAP: Record<string, string> = {
   japan: 'Japan',
   'made in japan': 'Japan',
+  'crafted in japan': 'Japan',
   korea: 'South Korea',
   'south korea': 'South Korea',
+  'republic of korea': 'South Korea',
   indonesia: 'Indonesia',
+  'made in indonesia': 'Indonesia',
   china: 'China',
+  'made in china': 'China',
+  prc: 'China',
   usa: 'USA',
   'united states': 'USA',
+  taiwan: 'Taiwan',
+  mexico: 'Mexico',
+  'czech republic': 'Czech Republic',
+  germany: 'Germany',
+  'united kingdom': 'UK',
+  uk: 'UK',
 };
 
 /** Normalize a value against a mapping table. */
@@ -491,6 +502,110 @@ export function parseNumberOfStrings(factoryTuning: string | null): number | nul
   const commaCount = (factoryTuning.match(/,/g) ?? []).length;
   if (commaCount >= 3) return commaCount + 1;
   return null;
+}
+
+/**
+ * Extract pickup configuration groups from a raw pickup configuration string.
+ * Recognizes H (humbucker), S (single coil), TC (triple coil), Piezo, Synth.
+ *
+ * Each distinct configuration becomes one entry in the list.
+ * Year-range variants produce separate entries (e.g., "2020: HSH 2021: HH" → ["HH", "HSH"]).
+ * Piezo and Synth are extracted as standalone entries separate from the H/S/TC group.
+ *
+ * Examples:
+ *   "HSH"              → ["HSH"]
+ *   "H"                → ["H"]
+ *   "HH"               → ["HH"]
+ *   "HSH + Piezo"      → ["HSH", "Piezo"]
+ *   "Triple coil"      → ["TC"]
+ *   "2020: HSH 2021: HH" → ["HH", "HSH"]
+ */
+export function extractPickupConfigurationList(raw: string | null): string[] {
+  if (!raw) return [];
+
+  const found = new Set<string>();
+  let text = cleanText(raw);
+
+  // Normalize long-form names to uppercase compact tokens
+  text = text.replace(/\btriple[- ]?coil\b/gi, 'TC');
+  text = text.replace(/\bhumbucker\b/gi, 'H');
+  text = text.replace(/\bsingle[- ]coil\b/gi, 'S');
+  // "single" alone → S, but not "single string" (string count descriptions)
+  text = text.replace(/\bsingle\b(?!\s+string)/gi, 'S');
+
+  // Piezo and Synth are standalone add-on types, not part of the H/S group
+  if (/\bpiezo\b/i.test(text)) found.add('Piezo');
+  if (/\bsynth\b/i.test(text)) found.add('Synth');
+  text = text.replace(/\bpiezo\b/gi, '').replace(/\bsynth\b/gi, '');
+
+  // Split on year-range boundaries (handles "2020: HSH 2021: HH" multi-year entries)
+  const yearSplitPattern = /(?=[""]?\d{4}[""]?\s*[-–—]?\s*\d{0,4}[""]?\s*:)/g;
+  const segments = text.split(yearSplitPattern);
+
+  for (const seg of segments) {
+    // Strip leading year prefix from each segment
+    const noYear = seg
+      .replace(/^[""]?\d{4}[""]?\s*[-–—]\s*\d{4}[""]?\s*:\s*/g, '')
+      .replace(/^[""]?\d{4}[""]?\s*:\s*/g, '')
+      .trim();
+    if (!noYear) continue;
+
+    // Collect H/S/TC tokens in order and join as a single group string.
+    // We scan for uppercase H, S, and TC only — after our replacements above all
+    // recognized tokens are uppercase, leaving other text (brand names, adjectives) lowercase.
+    const tokens: string[] = [];
+    const tokenPattern = /TC|[HS]/g;
+    let match: RegExpExecArray | null;
+    while ((match = tokenPattern.exec(noYear)) !== null) {
+      tokens.push(match[0]);
+    }
+
+    if (tokens.length > 0) {
+      found.add(tokens.join(''));
+    }
+  }
+
+  return [...found].sort();
+}
+
+/**
+ * Extract recognized country names from a raw country_of_origin string.
+ * Returns a deduplicated sorted list of normalized country names.
+ */
+export function extractCountryOfOriginList(raw: string | null): string[] {
+  if (!raw) return [];
+
+  const cleaned = cleanText(raw);
+  const found = new Set<string>();
+
+  for (const [key, value] of Object.entries(COUNTRY_MAP)) {
+    const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+    if (regex.test(cleaned)) {
+      found.add(value);
+    }
+  }
+
+  return [...found].sort();
+}
+
+/**
+ * Extract valid fret counts from a raw number_of_frets string.
+ * Only includes isolated numbers in the range 10–40, filtering out years and other noise.
+ */
+export function extractNumberOfFretsList(raw: string | null): number[] {
+  if (!raw) return [];
+
+  const cleaned = cleanText(raw);
+  const found = new Set<number>();
+
+  const matches = cleaned.match(/\d+/g) ?? [];
+  for (const m of matches) {
+    const n = parseInt(m, 10);
+    if (n >= 10 && n <= 40) found.add(n);
+  }
+
+  return [...found].sort((a, b) => a - b);
 }
 
 /**

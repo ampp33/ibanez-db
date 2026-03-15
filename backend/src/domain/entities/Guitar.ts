@@ -62,6 +62,10 @@ export class Guitar {
   @Property({ type: 'int', nullable: true })
   numberOfFrets: number | null = null;
 
+  /** Normalized list of valid fret counts (10–40). Used for filtering. */
+  @Property({ type: 'json' })
+  numberOfFretsList: number[] = [];
+
   /** Number of strings (e.g., 4, 6, 7, 8). */
   @Property({ type: 'int', nullable: true })
   numberOfStrings: number | null = null;
@@ -72,6 +76,10 @@ export class Guitar {
   /** e.g., HSH, HSS, HH, SSS */
   @Property({ type: 'text', nullable: true })
   pickupConfiguration: string | null = null;
+
+  /** Normalized list of pickup types (e.g., ["H", "S"]). Used for filtering. */
+  @Property({ type: 'json' })
+  pickupConfigurationList: string[] = [];
 
   @Property({ type: 'text', nullable: true })
   neckPickup: string | null = null;
@@ -97,6 +105,10 @@ export class Guitar {
 
   @Property({ type: 'text', nullable: true })
   countryOfOrigin: string | null = null;
+
+  /** Normalized list of country names (e.g., ["Japan"]). Used for filtering. */
+  @Property({ type: 'json' })
+  countryOfOriginList: string[] = [];
 
   /** Free-text years produced string from wiki (e.g., "1987-1994, 2007-present"). */
   @Property({ type: 'text', nullable: true })

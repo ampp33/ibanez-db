@@ -179,34 +179,42 @@ export class GuitarService {
    * Returns undefined if no array filters are active (no restriction needed).
    */
   private async getArrayFilterIds(params: GuitarFilterParams): Promise<string[] | undefined> {
-    const hasBodyFilter = params.bodyMaterial && (Array.isArray(params.bodyMaterial) ? params.bodyMaterial.length > 0 : true);
-    const hasNeckFilter = params.neckMaterial && (Array.isArray(params.neckMaterial) ? params.neckMaterial.length > 0 : true);
-    const hasFretboardFilter = params.fretboardMaterial && (Array.isArray(params.fretboardMaterial) ? params.fretboardMaterial.length > 0 : true);
+    const hasArr = (v: unknown): boolean =>
+      v != null && (Array.isArray(v) ? (v as unknown[]).length > 0 : true);
 
-    if (!hasBodyFilter && !hasNeckFilter && !hasFretboardFilter) return undefined;
+    const hasBodyFilter = hasArr(params.bodyMaterial);
+    const hasNeckFilter = hasArr(params.neckMaterial);
+    const hasFretboardFilter = hasArr(params.fretboardMaterial);
+    const hasPickupFilter = hasArr(params.pickupConfiguration);
+    const hasCountryFilter = hasArr(params.countryOfOrigin);
+    const hasFretsFilter = hasArr(params.numberOfFrets);
+
+    if (!hasBodyFilter && !hasNeckFilter && !hasFretboardFilter &&
+        !hasPickupFilter && !hasCountryFilter && !hasFretsFilter) return undefined;
 
     const knex = this.em.getConnection().getKnex();
     let query = knex('guitars').select('id');
 
-    if (hasBodyFilter) {
-      const vals = Array.isArray(params.bodyMaterial) ? params.bodyMaterial : [params.bodyMaterial as string];
+    const addStringArrayFilter = (column: string, value: string | string[] | undefined): void => {
+      if (!value) return;
+      const vals = Array.isArray(value) ? value : [value];
       query = query.whereRaw(
         'EXISTS (SELECT 1 FROM jsonb_array_elements_text(??) m WHERE m = ANY(?))',
-        ['body_material_list', vals],
+        [column, vals],
       );
-    }
-    if (hasNeckFilter) {
-      const vals = Array.isArray(params.neckMaterial) ? params.neckMaterial : [params.neckMaterial as string];
+    };
+
+    addStringArrayFilter('body_material_list', params.bodyMaterial as string | string[] | undefined);
+    addStringArrayFilter('neck_material_list', params.neckMaterial as string | string[] | undefined);
+    addStringArrayFilter('fretboard_material_list', params.fretboardMaterial as string | string[] | undefined);
+    addStringArrayFilter('pickup_configuration_list', params.pickupConfiguration as string | string[] | undefined);
+    addStringArrayFilter('country_of_origin_list', params.countryOfOrigin as string | string[] | undefined);
+
+    if (hasFretsFilter) {
+      const vals = Array.isArray(params.numberOfFrets) ? params.numberOfFrets : [params.numberOfFrets as number];
       query = query.whereRaw(
-        'EXISTS (SELECT 1 FROM jsonb_array_elements_text(??) m WHERE m = ANY(?))',
-        ['neck_material_list', vals],
-      );
-    }
-    if (hasFretboardFilter) {
-      const vals = Array.isArray(params.fretboardMaterial) ? params.fretboardMaterial : [params.fretboardMaterial as string];
-      query = query.whereRaw(
-        'EXISTS (SELECT 1 FROM jsonb_array_elements_text(??) m WHERE m = ANY(?))',
-        ['fretboard_material_list', vals],
+        'EXISTS (SELECT 1 FROM jsonb_array_elements(??) m WHERE (m)::int = ANY(?))',
+        ['number_of_frets_list', vals],
       );
     }
 
@@ -234,16 +242,12 @@ export class GuitarService {
     };
 
     arrayFilter('series', params.series);
-    // bodyMaterial, neckMaterial, fretboardMaterial now filtered via arrayFilterIds
-    arrayFilter('pickupConfiguration', params.pickupConfiguration);
+    arrayFilter('bodyType', params.bodyType);
+    arrayFilter('neckType', params.neckType);
+    // bodyMaterial, neckMaterial, fretboardMaterial, pickupConfiguration,
+    // countryOfOrigin, numberOfFrets now filtered via arrayFilterIds (jsonb list columns)
     arrayFilter('bridgeType', params.bridgeType);
     arrayFilter('hardwareColor', params.hardwareColor);
-    arrayFilter('countryOfOrigin', params.countryOfOrigin);
-
-    if (params.numberOfFrets !== undefined) {
-      const frets = Array.isArray(params.numberOfFrets) ? params.numberOfFrets : [params.numberOfFrets];
-      conditions.push({ numberOfFrets: { $in: frets } } as FilterQuery<Guitar>);
-    }
 
     if (params.numberOfStrings !== undefined) {
       const strings = Array.isArray(params.numberOfStrings) ? params.numberOfStrings : [params.numberOfStrings];
@@ -290,15 +294,12 @@ export class GuitarService {
     // ---- Standard scalar field facets ----
     const scalarFields = [
       'series',
-      'pickup_configuration',
+      'body_type',
+      'neck_type',
       'bridge_type',
       'hardware_color',
-      'country_of_origin',
-      'number_of_frets',
       'number_of_strings',
     ] as const;
-
-    const intFields = new Set(['number_of_frets', 'number_of_strings']);
 
     for (const field of scalarFields) {
       let query = knex('guitars')
@@ -306,7 +307,7 @@ export class GuitarService {
         .count('* as count')
         .whereNotNull(field);
 
-      if (!intFields.has(field)) {
+      if (field !== 'number_of_strings') {
         query = query.where(field, '!=', '');
       }
 
@@ -331,6 +332,9 @@ export class GuitarService {
       { column: 'body_material_list', facetKey: 'bodyMaterial' },
       { column: 'neck_material_list', facetKey: 'neckMaterial' },
       { column: 'fretboard_material_list', facetKey: 'fretboardMaterial' },
+      { column: 'pickup_configuration_list', facetKey: 'pickupConfiguration' },
+      { column: 'country_of_origin_list', facetKey: 'countryOfOrigin' },
+      { column: 'number_of_frets_list', facetKey: 'numberOfFrets' },
     ];
 
     for (const { column, facetKey } of listFields) {
@@ -381,9 +385,11 @@ export class GuitarService {
       fretboardMaterialList: guitar.fretboardMaterialList ?? [],
       fretboardRadius: guitar.fretboardRadius,
       numberOfFrets: guitar.numberOfFrets,
+      numberOfFretsList: guitar.numberOfFretsList ?? [],
       numberOfStrings: guitar.numberOfStrings,
       scaleLength: guitar.scaleLength,
       pickupConfiguration: guitar.pickupConfiguration,
+      pickupConfigurationList: guitar.pickupConfigurationList ?? [],
       neckPickup: guitar.neckPickup,
       middlePickup: guitar.middlePickup,
       bridgePickup: guitar.bridgePickup,
@@ -392,6 +398,7 @@ export class GuitarService {
       hardwareColor: guitar.hardwareColor,
       finishes: guitar.finishes ?? [],
       countryOfOrigin: guitar.countryOfOrigin,
+      countryOfOriginList: guitar.countryOfOriginList ?? [],
       yearsProduced: guitar.yearsProduced,
       productionStart: guitar.productionStart,
       productionEnd: guitar.productionEnd,

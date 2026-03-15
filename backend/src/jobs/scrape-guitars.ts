@@ -25,9 +25,10 @@ async function downloadImage(
     const arrayBuffer = await response.arrayBuffer();
     const data = Buffer.from(arrayBuffer);
 
-    // Extract original filename from URL
-    const urlPath = new URL(url).pathname;
-    const originalName = decodeURIComponent(urlPath.split('/').pop() ?? 'image.jpg');
+    // Extract original filename from URL (Fandom CDN paths end in /revision/latest/…)
+    const parts = new URL(url).pathname.split('/');
+    const namePart = parts.find((p) => /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(p));
+    const originalName = decodeURIComponent(namePart ?? parts.pop() ?? 'image.jpg');
 
     return { data, mimeType: contentType, originalName };
   } catch (err) {
@@ -36,10 +37,15 @@ async function downloadImage(
   }
 }
 
-/** Extract the original filename from a wiki image URL. */
+/** Extract the original filename from a wiki image URL.
+ * Fandom CDN URLs have the form: /wiki/images/.../Filename.png/revision/latest[/...]
+ * so we look for the path segment that has a known image extension rather than
+ * blindly taking the last segment (which would be "latest").
+ */
 function extractImageName(url: string): string {
-  const urlPath = new URL(url).pathname;
-  return decodeURIComponent(urlPath.split('/').pop() ?? 'image.jpg');
+  const parts = new URL(url).pathname.split('/');
+  const namePart = parts.find((p) => /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(p));
+  return decodeURIComponent(namePart ?? parts.pop() ?? 'image.jpg');
 }
 
 /** Process a single scraped guitar: upsert DB record and sync images. */
@@ -62,9 +68,11 @@ async function processGuitar(
     fretboardMaterialList: scraped.fretboardMaterialList,
     fretboardRadius: scraped.fretboardRadius,
     numberOfFrets: scraped.numberOfFrets,
+    numberOfFretsList: scraped.numberOfFretsList,
     numberOfStrings: scraped.numberOfStrings,
     scaleLength: scraped.scaleLength,
     pickupConfiguration: scraped.pickupConfiguration,
+    pickupConfigurationList: scraped.pickupConfigurationList,
     neckPickup: scraped.neckPickup,
     middlePickup: scraped.middlePickup,
     bridgePickup: scraped.bridgePickup,
@@ -73,6 +81,7 @@ async function processGuitar(
     hardwareColor: scraped.hardwareColor,
     finishes: scraped.finishes,
     countryOfOrigin: scraped.countryOfOrigin,
+    countryOfOriginList: scraped.countryOfOriginList,
     yearsProduced: scraped.yearsProduced,
     productionStart: scraped.productionStart,
     productionEnd: scraped.productionEnd,

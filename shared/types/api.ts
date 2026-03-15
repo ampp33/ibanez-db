@@ -26,7 +26,9 @@ export interface PaginatedResponse<T> {
 export interface GuitarFilterParams extends PaginationParams {
   search?: string;
   series?: string | string[];
+  bodyType?: string | string[];
   bodyMaterial?: string | string[];
+  neckType?: string | string[];
   neckMaterial?: string | string[];
   fretboardMaterial?: string | string[];
   pickupConfiguration?: string | string[];
@@ -58,7 +60,9 @@ export interface FacetBucket {
 /** All available facets returned alongside guitar list results. */
 export interface GuitarFacets {
   series: FacetBucket[];
+  bodyType: FacetBucket[];
   bodyMaterial: FacetBucket[];
+  neckType: FacetBucket[];
   neckMaterial: FacetBucket[];
   fretboardMaterial: FacetBucket[];
   pickupConfiguration: FacetBucket[];

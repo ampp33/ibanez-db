@@ -19,6 +19,9 @@ import {
   extractBodyMaterialList,
   extractNeckMaterialList,
   extractFretboardMaterialList,
+  extractPickupConfigurationList,
+  extractCountryOfOriginList,
+  extractNumberOfFretsList,
   parseNumberOfStrings,
   isBassModel,
 } from './field-normalizer';
@@ -44,9 +47,11 @@ export interface ScrapedGuitar {
   fretboardMaterialList: string[];
   fretboardRadius: string | null;
   numberOfFrets: number | null;
+  numberOfFretsList: number[];
   numberOfStrings: number | null;
   scaleLength: string | null;
   pickupConfiguration: string | null;
+  pickupConfigurationList: string[];
   neckPickup: string | null;
   middlePickup: string | null;
   bridgePickup: string | null;
@@ -55,6 +60,7 @@ export interface ScrapedGuitar {
   hardwareColor: string | null;
   finishes: string[];
   countryOfOrigin: string | null;
+  countryOfOriginList: string[];
   yearsProduced: string | null;
   productionStart: number | null;
   productionEnd: number | null;
@@ -453,10 +459,15 @@ function mapRawToGuitar(
     fretboardMaterialList: extractFretboardMaterialList(rawFretboard),
     fretboardRadius: get('fretboard radius', 'radius', 'fingerboard radius'),
     numberOfFrets: rawFrets ? parseNumberOfFrets(rawFrets) : null,
+    numberOfFretsList: extractNumberOfFretsList(rawFrets),
     numberOfStrings,
     scaleLength: get('scale length', 'scale'),
     pickupConfiguration: get('pickup configuration', 'pickup config', 'electronics')
       ?? derivePickupConfiguration(neckPickup, middlePickup, bridgePickup),
+    pickupConfigurationList: extractPickupConfigurationList(
+      get('pickup configuration', 'pickup config', 'electronics')
+        ?? derivePickupConfiguration(neckPickup, middlePickup, bridgePickup),
+    ),
     neckPickup,
     middlePickup,
     bridgePickup,
@@ -465,6 +476,7 @@ function mapRawToGuitar(
     hardwareColor: rawHardware ? normalizeHardwareColor(rawHardware) : null,
     finishes: rawFinishes ? parseFinishes(rawFinishes) : [],
     countryOfOrigin: rawCountry ? normalizeCountry(rawCountry) : null,
+    countryOfOriginList: extractCountryOfOriginList(rawCountry),
     yearsProduced: rawYears ?? null,
     productionStart: years.start,
     productionEnd: years.end,

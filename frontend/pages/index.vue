@@ -13,12 +13,13 @@ import type {
 const FACET_CATEGORIES: Array<{ field: keyof GuitarFacets; label: string }> = [
   { field: 'series', label: 'Series' },
   { field: 'numberOfStrings', label: 'Strings' },
+  { field: 'bodyType', label: 'Body Type' },
+  { field: 'neckType', label: 'Neck Type' },
   { field: 'pickupConfiguration', label: 'Pickup Config' },
-  { field: 'bridgeType', label: 'Bridge Type' },
+  { field: 'bridgeType', label: 'Bridge' },
   { field: 'bodyMaterial', label: 'Body Material' },
   { field: 'neckMaterial', label: 'Neck Material' },
   { field: 'fretboardMaterial', label: 'Fretboard' },
-  { field: 'hardwareColor', label: 'Hardware Color' },
   { field: 'countryOfOrigin', label: 'Country of Origin' },
   { field: 'numberOfFrets', label: 'Frets' },
 ];
