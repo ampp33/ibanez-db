@@ -18,12 +18,12 @@ export default defineComponent({
   computed: {
     attributes(): Array<{ label: string; value: string }> {
       const attrs: Array<{ label: string; value: string }> = [];
-      if (this.guitar.series) attrs.push({ label: 'Series', value: this.guitar.series });
-      if (this.guitar.pickupConfiguration) attrs.push({ label: 'Pickups', value: this.guitar.pickupConfiguration });
-      if (this.guitar.bridgeType) attrs.push({ label: 'Bridge', value: this.guitar.bridgeType });
-      if (this.guitar.bodyMaterialList?.length > 0) attrs.push({ label: 'Body', value: this.guitar.bodyMaterialList.join(", ") });
-      if (this.guitar.countryOfOriginList) attrs.push({ label: 'Origin', value: this.guitar.countryOfOriginList.join(", ") });
-      return attrs.slice(0, 4);
+      if (this.guitar.series) attrs.push({ label: 'Series', value: this.guitar.series + " Series" });
+      if (this.guitar.pickupConfiguration) attrs.push({ label: 'Pickups', value: "Pickup Config: " + this.guitar.pickupConfiguration });
+      if (this.guitar.bridgeType) attrs.push({ label: 'Bridge', value: "Bridge: " + this.guitar.bridgeType });
+      if (this.guitar.bodyMaterialList?.length > 0) attrs.push({ label: 'Body', value: "Body: " + this.guitar.bodyMaterialList.join(", ") });
+      if (this.guitar.countryOfOriginList?.length > 0) attrs.push({ label: 'Origin', value: "Origin: " + this.guitar.countryOfOriginList.join(", ")});
+      return attrs
     },
   },
 });
