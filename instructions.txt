@@ -1,0 +1,93 @@
+https://ibanez.fandom.com/wiki/Category:Guitar_models
+
+
+PLAN MODE:
+We need to ask and get an idea of how we need to prompt to get a pretty UI and good suggestions for tools/libs
+
+Reference the @AGENTS.md file in this project for all guidelines on how to write your code.
+
+
+
+
+
+
+
+
+I want to write a TS based app that will do the following:
+1. have an async job that runs nightly that pulls data from the https://ibanez.fandom.com wiki site, puts that data into some form of database
+- must pull each field from the site and put it into a structured schema so that there's uniformity across all guitar models, allowing for easy(er) searchability
+- should be smart about aggregating data, if one guitar has a neck "Dimarzio Fusion (Neck)" pickup and another that has a "Dimarzio Fusion" neck pickup, this tool should recognize that they're the same pickup and not have separate entries for them
+2. Have a frontend that is a beautiful modern UI that lets users search all the guitars in the database, with a search UI that's very similar to NewEgg.com's search page, where the filterable fields are categorized, listed, collapsable, are listed at the top of the search results and can be clicked to be removed from the search query
+
+Please help me come up with an AI prompt to help me effectively request this project's code, particularly by helping me explicitly list ideal libraries, tools, UI libs, etc so that I can point the AI in the right direction to build the most beautiful, performant, and accurate app.
+
+Can you please ask me some questions about libraries I could use?  I'll look at each library/tool you suggest, will evaluate it, and give you an answer.  Let's do that for each library and design decision.  Please keep a checklist of each question you have to ask me, so I know how many questions we have left to answer.
+
+Reference the @AGENTS.md file in this project for all guidelines on how to write your code.
+
+
+
+
+
+
+23:47
+5%
+12%
+
+
+
+
+
+You are an expert TypeScript full-stack developer. Follow the @AGENTS.md guidelines for code generation.
+
+Task: Build a full-stack TypeScript application for cataloging Ibanez guitars. The app must include:
+
+1. Backend
+  - Node.js + Fastify REST API
+  - Supabase (Postgres) database, using MikroORM
+  - REST endpoints:
+    - GET /guitars (supports faceted filtering by all fields)
+    - GET /guitars/:id
+    - POST /guitars (for admin/testing)
+  - Nightly cron job:
+    - Scrape https://ibanez.fandom.com (see https://ibanez.fandom.com/wiki/Category:Guitar_models for an easy full list of guitars on the site) using Cheerio (and MediaWiki API fallback)
+    - Extract all guitar fields into a uniform schema
+    - Normalize similar fields (e.g., pickups)
+    - upsert Postgres database
+    - Upload associated images to MinIO bucket
+      - Use key structure: /<guitar-identifier>/<guid>.<ext>
+      - Keep track of the original image name and size, so we can detect if an image was added, removed, or changed
+      - Keep track of the primary image used to display the guitar, this image will be displayed prominently on the guitar details page and search results
+
+2. Frontend
+  - Nuxt.js (Vue 3, Options API)
+  - Tailwind CSS + shadcn-vue
+  - Search page:
+    - Newegg-style faceted filters at top
+    - Collapsible filter categories
+    - Dynamic tags for active filters (clickable to remove)
+    - Search dynamically loads guitars from REST API
+    - Displays (primary) guitar image, name, and key attributes
+  - Guitar detail page (lists all guitar data)
+
+3. Deployment
+  - Docker-based, include Dockerfiles for backend, frontend, and MinIO
+  - MinIO should be easily switchable to AWS S3
+  - Use environment variables for MinIO endpoint and credentials
+
+4. Coding standards
+  - TypeScript everywhere
+  - Strong typing for database entities, API endpoints, and frontend props
+  - Clean, modular architecture
+  - Follow best practices from @AGENTS.md (use design patterns, proper folder structure, code clarity)
+  - Include error handling, logging, and comments
+
+Output:  
+- Provide a full project directory structure
+- Include sample environment config files
+- Include sample SQL schema/migrations
+- Include example REST API responses
+- Include Nuxt pages and components for the search UI
+- README for project with development notes, including the details above in this Output section, plus info for users
+
+Make sure the code is production-ready and scalable.

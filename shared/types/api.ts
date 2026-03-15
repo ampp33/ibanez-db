@@ -1,0 +1,86 @@
+/**
+ * API request/response types shared between backend and frontend.
+ */
+
+import type { GuitarDto, GuitarDetailDto } from './guitar';
+
+// ---- Pagination ----
+
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+// ---- Guitar list (with faceted filters) ----
+
+export interface GuitarFilterParams extends PaginationParams {
+  search?: string;
+  series?: string | string[];
+  bodyMaterial?: string | string[];
+  neckMaterial?: string | string[];
+  fretboardMaterial?: string | string[];
+  pickupConfiguration?: string | string[];
+  bridgeType?: string | string[];
+  hardwareColor?: string | string[];
+  countryOfOrigin?: string | string[];
+  tremolo?: boolean;
+  numberOfFrets?: number | number[];
+  numberOfStrings?: number | number[];
+  productionStart?: number;
+  productionEnd?: number;
+  sortBy?: GuitarSortField;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export type GuitarSortField =
+  | 'model'
+  | 'series'
+  | 'productionStart'
+  | 'createdAt'
+  | 'updatedAt';
+
+/** A single facet bucket for filter UIs. */
+export interface FacetBucket {
+  value: string;
+  count: number;
+}
+
+/** All available facets returned alongside guitar list results. */
+export interface GuitarFacets {
+  series: FacetBucket[];
+  bodyMaterial: FacetBucket[];
+  neckMaterial: FacetBucket[];
+  fretboardMaterial: FacetBucket[];
+  pickupConfiguration: FacetBucket[];
+  bridgeType: FacetBucket[];
+  hardwareColor: FacetBucket[];
+  countryOfOrigin: FacetBucket[];
+  numberOfFrets: FacetBucket[];
+  numberOfStrings: FacetBucket[];
+}
+
+export interface GuitarListResponse extends PaginatedResponse<GuitarDto> {
+  facets: GuitarFacets;
+}
+
+// ---- Guitar detail ----
+
+export type GuitarDetailResponse = GuitarDetailDto;
+
+// ---- Error ----
+
+export interface ApiError {
+  statusCode: number;
+  error: string;
+  message: string;
+}

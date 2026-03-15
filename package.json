@@ -1,0 +1,25 @@
+{
+  "name": "ibanez-db",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev -w backend",
+    "dev:frontend": "npm run dev -w frontend",
+    "build:shared": "npm run build -w shared",
+    "build:backend": "npm run build -w backend",
+    "build:frontend": "npm run build -w frontend",
+    "build": "npm run build:shared && npm run build:backend && npm run build:frontend",
+    "typecheck": "npm run typecheck -w backend && npm run typecheck -w frontend",
+    "scrape": "npm run scrape -w backend",
+    "lint": "npm run lint -w backend && npm run lint -w frontend",
+    "test": "npm run test -w backend"
+  },
+  "description": "Full-stack Ibanez guitar catalog application",
+  "author": "",
+  "license": "ISC"
+}
