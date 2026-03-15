@@ -21,8 +21,8 @@ export default defineComponent({
       if (this.guitar.series) attrs.push({ label: 'Series', value: this.guitar.series });
       if (this.guitar.pickupConfiguration) attrs.push({ label: 'Pickups', value: this.guitar.pickupConfiguration });
       if (this.guitar.bridgeType) attrs.push({ label: 'Bridge', value: this.guitar.bridgeType });
-      if (this.guitar.bodyMaterial) attrs.push({ label: 'Body', value: this.guitar.bodyMaterial });
-      if (this.guitar.countryOfOrigin) attrs.push({ label: 'Origin', value: this.guitar.countryOfOrigin });
+      if (this.guitar.bodyMaterialList?.length > 0) attrs.push({ label: 'Body', value: this.guitar.bodyMaterialList.join(", ") });
+      if (this.guitar.countryOfOriginList) attrs.push({ label: 'Origin', value: this.guitar.countryOfOriginList.join(", ") });
       return attrs.slice(0, 4);
     },
   },
@@ -60,7 +60,7 @@ export default defineComponent({
         v-if="guitar.yearsProduced"
         class="text-xs text-muted-foreground mt-1"
       >
-        {{ guitar.yearsProduced }}
+        {{ guitar.productionStart }} - {{ guitar.productionEnd }}
       </p>
 
       <div class="mt-3 flex flex-wrap gap-1.5">

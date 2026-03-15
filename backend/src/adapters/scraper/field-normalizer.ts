@@ -24,6 +24,7 @@ const BODY_MATERIAL_MAP: Record<string, string> = {
   maple: 'Maple',
   'flamed maple': 'Flamed Maple',
   'quilted maple': 'Quilted Maple',
+  'spalted maple': 'Spalted Maple',
   'soft flame maple': 'Flamed Maple',
   walnut: 'Walnut',
   nyatoh: 'Nyatoh',
@@ -302,6 +303,7 @@ function stripPieceCount(s: string): string {
   return s
     .replace(/^\d+[-\s]?piece\s*/i, '')
     .replace(/^\d+pc\s*/i, '')
+    .replace(/^\d+mm\s*/i, '')
     .trim();
 }
 
@@ -315,6 +317,7 @@ function stripModifiers(s: string): string {
     .replace(/\s+w\/.*$/i, '')  // strip " w/ ..."
     .replace(/\s+with\s+.*$/i, '') // strip " with ..."
     .replace(/\s+\(.*\)\s*$/, '') // strip trailing parenthetical
+    .replace(/\s+(?:top|body|back|sides?)\s*$/i, '') // strip position suffixes
     .trim();
 }
 
@@ -339,8 +342,12 @@ function extractMaterialsFromRaw(
     const noYear = stripYearPrefix(seg);
     if (!noYear) continue;
 
-    // Split on slash separators (composite necks like "maple/ walnut")
-    const parts = noYear.split(/\s*\/\s*/);
+    // Normalize "w/" (shorthand for "with/") to "/" so both materials are captured,
+    // e.g. "Mahogany w/ Maple top" → "Mahogany / Maple top"
+    const withNormalized = noYear.replace(/\bw\s*\//gi, '/');
+
+    // Split on slash separators (composite materials like "maple/ walnut")
+    const parts = withNormalized.split(/\s*\/\s*/);
 
     for (const part of parts) {
       const noCount = stripPieceCount(part);

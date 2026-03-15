@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { ArrowLeft, ExternalLink, ImageOff } from 'lucide-vue-next';
+import { ArrowLeft, ChevronLeft, ChevronRight, ExternalLink, ImageOff, Maximize2, X } from 'lucide-vue-next';
 import type { GuitarDetailDto, GuitarImageDto } from '../../types';
 
 /** Spec table fields to display in order. */
@@ -27,7 +27,7 @@ const SPEC_FIELDS: Array<{ key: keyof GuitarDetailDto; label: string }> = [
 
 export default defineComponent({
   name: 'GuitarDetailPage',
-  components: { ArrowLeft, ExternalLink, ImageOff },
+  components: { ArrowLeft, ChevronLeft, ChevronRight, ExternalLink, ImageOff, Maximize2, X },
   setup() {
     const { fetchGuitar } = useGuitarApi();
     const route = useRoute();
@@ -40,6 +40,7 @@ export default defineComponent({
       error: null as string | null,
       selectedImageIndex: 0,
       specFields: SPEC_FIELDS,
+      lightboxOpen: false,
     };
   },
   computed: {
@@ -64,6 +65,9 @@ export default defineComponent({
     selectedImage(): GuitarImageDto | null {
       return this.images[this.selectedImageIndex] ?? null;
     },
+    lightboxImageUrl(): string | null {
+      return this.selectedImage?.url ?? this.guitar?.primaryImageUrl ?? null;
+    },
     extraAttributes(): Array<{ key: string; value: string }> {
       if (!this.guitar?.rawAttributes) return [];
       const shownKeys = new Set(this.specFields.map((f) => f.label.toLowerCase()));
@@ -82,6 +86,11 @@ export default defineComponent({
   },
   async mounted() {
     await this.loadGuitar();
+    window.addEventListener('keydown', this.handleKeydown);
+  },
+  beforeUnmount() {
+    window.removeEventListener('keydown', this.handleKeydown);
+    document.body.style.overflow = '';
   },
   methods: {
     async loadGuitar(): Promise<void> {
@@ -98,6 +107,29 @@ export default defineComponent({
     },
     selectImage(index: number): void {
       this.selectedImageIndex = index;
+    },
+    openLightbox(): void {
+      if (!this.lightboxImageUrl) return;
+      this.lightboxOpen = true;
+      document.body.style.overflow = 'hidden';
+    },
+    closeLightbox(): void {
+      this.lightboxOpen = false;
+      document.body.style.overflow = '';
+    },
+    lightboxNext(): void {
+      if (this.images.length <= 1) return;
+      this.selectedImageIndex = (this.selectedImageIndex + 1) % this.images.length;
+    },
+    lightboxPrev(): void {
+      if (this.images.length <= 1) return;
+      this.selectedImageIndex = (this.selectedImageIndex - 1 + this.images.length) % this.images.length;
+    },
+    handleKeydown(e: KeyboardEvent): void {
+      if (!this.lightboxOpen) return;
+      if (e.key === 'ArrowRight') this.lightboxNext();
+      else if (e.key === 'ArrowLeft') this.lightboxPrev();
+      else if (e.key === 'Escape') this.closeLightbox();
     },
   },
 });
@@ -156,7 +188,11 @@ export default defineComponent({
         <!-- Image gallery -->
         <div>
           <!-- Main image -->
-          <div class="aspect-square rounded-lg border bg-card overflow-hidden mb-3">
+          <div
+            class="aspect-square rounded-lg border bg-card overflow-hidden mb-3 group relative"
+            :class="lightboxImageUrl ? 'cursor-pointer' : ''"
+            @click="openLightbox"
+          >
             <img
               v-if="selectedImage"
               :src="selectedImage.url"
@@ -174,6 +210,15 @@ export default defineComponent({
               class="w-full h-full flex items-center justify-center text-muted-foreground/30"
             >
               <ImageOff class="h-24 w-24" :stroke-width="1" />
+            </div>
+            <!-- Zoom hint on hover -->
+            <div
+              v-if="lightboxImageUrl"
+              class="absolute inset-0 flex items-end justify-end p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+            >
+              <div class="bg-black/50 rounded-full p-1.5">
+                <Maximize2 class="h-4 w-4 text-white" />
+              </div>
             </div>
           </div>
 
@@ -304,4 +349,68 @@ export default defineComponent({
       </div>
     </div>
   </div>
+
+  <!-- Lightbox modal -->
+  <Teleport to="body">
+    <div
+      v-if="lightboxOpen"
+      class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Image viewer"
+    >
+      <!-- Backdrop: click outside image to close -->
+      <div class="absolute inset-0" @click="closeLightbox" />
+
+      <!-- Image -->
+       <div class="bg-white p-10">
+         <img
+           v-if="lightboxImageUrl"
+           :src="lightboxImageUrl"
+           :alt="guitar?.name"
+           class="relative z-10 max-w-[90vw] max-h-[90vh] object-contain select-none"
+         />
+       </div>
+
+      <!-- Close button -->
+      <button
+        type="button"
+        class="absolute z-20 top-4 right-4 rounded-full bg-white/10 text-white p-2 hover:bg-white/25 transition-colors"
+        aria-label="Close image viewer"
+        @click="closeLightbox"
+      >
+        <X class="h-5 w-5" />
+      </button>
+
+      <!-- Prev arrow -->
+      <button
+        v-if="images.length > 1"
+        type="button"
+        class="absolute z-20 left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 text-white p-3 hover:bg-white/25 transition-colors"
+        aria-label="Previous image"
+        @click="lightboxPrev"
+      >
+        <ChevronLeft class="h-6 w-6" />
+      </button>
+
+      <!-- Next arrow -->
+      <button
+        v-if="images.length > 1"
+        type="button"
+        class="absolute z-20 right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 text-white p-3 hover:bg-white/25 transition-colors"
+        aria-label="Next image"
+        @click="lightboxNext"
+      >
+        <ChevronRight class="h-6 w-6" />
+      </button>
+
+      <!-- Image counter -->
+      <div
+        v-if="images.length > 1"
+        class="absolute z-20 bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-sm tabular-nums"
+      >
+        {{ selectedImageIndex + 1 }} / {{ images.length }}
+      </div>
+    </div>
+  </Teleport>
 </template>
