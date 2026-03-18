@@ -8,6 +8,7 @@ import { scrapeAllGuitars, type ScrapedGuitar } from '../adapters/scraper/wiki-s
 import { MinioStorageAdapter } from '../adapters/storage/minio.adapter';
 import { GuitarService } from '../services/guitar.service';
 import { logger } from '../config/logger';
+import { env } from '../config/env';
 
 /** Download an image from a URL and return the buffer with metadata. */
 async function downloadImage(
@@ -92,7 +93,7 @@ async function processGuitar(
   });
 
   // Download and sync images, skipping ones already stored
-  if (scraped.imageUrls.length > 0) {
+  if (env.scraper.scrapeImages && scraped.imageUrls.length > 0) {
     const existingImages = await service.getExistingImageMap(scraped.model);
     const imageEntries = [];
 

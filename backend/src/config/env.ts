@@ -61,5 +61,6 @@ export const env = {
   scraper: {
     concurrency: optionalInt('SCRAPE_CONCURRENCY', 5),
     delayMs: optionalInt('SCRAPE_DELAY_MS', 500),
+    scrapeImages: optionalBool('SCRAPE_IMAGES', false),
   },
 } as const;

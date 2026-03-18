@@ -58,9 +58,10 @@ export default defineComponent({
       </h3>
       <p
         v-if="guitar.yearsProduced"
-        class="text-xs text-muted-foreground mt-1"
+        class="text-xs text-muted-foreground mt-1 flex justify-between"
       >
-        {{ guitar.productionStart }} - {{ guitar.productionEnd }}
+        <span>{{ guitar.productionStart }} - {{ guitar.productionEnd }}</span>
+        <!-- <span>{{ guitar.msrp }}</span> -->
       </p>
 
       <div class="mt-3 flex flex-wrap gap-1.5">
