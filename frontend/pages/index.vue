@@ -11,6 +11,7 @@ import type {
 
 /** Facet category definitions for the filter sidebar. */
 const FACET_CATEGORIES: Array<{ field: keyof GuitarFacets; label: string }> = [
+  { field: 'productCategory', label: 'Category' },
   { field: 'series', label: 'Series' },
   { field: 'numberOfStrings', label: 'Strings' },
   { field: 'bodyType', label: 'Body Type' },

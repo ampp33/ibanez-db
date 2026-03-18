@@ -6,6 +6,7 @@ import {
   Collection,
   type Ref,
 } from '@mikro-orm/core';
+import type { ProductCategory } from '@ibanez-db/shared';
 import { v4 as uuid } from 'uuid';
 import { GuitarImage } from './GuitarImage';
 
@@ -25,6 +26,10 @@ export class Guitar {
   /** URL-friendly slug derived from model name (e.g., "rg652ahms"). */
   @Property({ type: 'text', unique: true })
   slug!: string;
+
+  /** Whether this is a guitar or bass model, as determined by the wiki category. */
+  @Property({ type: 'text', nullable: true })
+  productCategory: ProductCategory | null = null;
 
   @Property({ type: 'text', nullable: true })
   series: string | null = null;

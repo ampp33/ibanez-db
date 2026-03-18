@@ -22,6 +22,7 @@ export async function guitarRoutes(
       search: asString(query.search),
       page: asInt(query.page) ?? 1,
       limit: asInt(query.limit) ?? 24,
+      productCategory: asStringArray(query.productCategory) as GuitarFilterParams['productCategory'],
       series: asStringArray(query.series),
       bodyType: asStringArray(query.bodyType),
       bodyMaterial: asStringArray(query.bodyMaterial),

@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import type { AnyNode, Element } from 'domhandler';
 import { logger } from '../../config/logger';
 import { env } from '../../config/env';
+import type { ProductCategory } from '@ibanez-db/shared';
 import {
   cleanText,
   normalizeBodyMaterial,
@@ -28,7 +29,8 @@ import {
 
 const WIKI_BASE = 'https://ibanez.fandom.com';
 const WIKI_API = `${WIKI_BASE}/api.php`;
-const CATEGORY_URL = `${WIKI_BASE}/wiki/Category:Guitar_models`;
+const GUITAR_CATEGORY_URL = `${WIKI_BASE}/wiki/Category:Guitar_models`;
+const BASS_CATEGORY_URL = `${WIKI_BASE}/wiki/Category:Bass_models`;
 const USER_AGENT =
   'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 
@@ -36,6 +38,7 @@ const USER_AGENT =
 export interface ScrapedGuitar {
   model: string;
   name: string;
+  productCategory: ProductCategory;
   series: string | null;
   bodyType: string | null;
   bodyMaterial: string | null;
@@ -112,32 +115,36 @@ async function fetchHtml(url: string): Promise<string> {
 }
 
 /**
- * Get all guitar model page URLs from the category page.
+ * Get all model page URLs from a category page.
  * Uses pagination (category pages may have "next page" links).
  */
-export async function fetchGuitarModelUrls(): Promise<Array<{ title: string; url: string }>> {
-  const models: Array<{ title: string; url: string }> = [];
+async function fetchModelUrlsFromCategory(
+  categoryUrl: string,
+  cmtitle: string,
+  productCategory: ProductCategory,
+): Promise<Array<{ title: string; url: string; productCategory: ProductCategory }>> {
+  const models: Array<{ title: string; url: string; productCategory: ProductCategory }> = [];
 
   // First try MediaWiki API for a more reliable listing
   try {
-    const apiModels = await fetchModelUrlsViaApi();
+    const apiModels = await fetchModelUrlsViaApi(cmtitle);
     if (apiModels.length > 0) {
-      logger.info(`Fetched ${apiModels.length} guitar models via MediaWiki API`);
-      return apiModels;
+      logger.info(`Fetched ${apiModels.length} models from ${cmtitle} via MediaWiki API`);
+      return apiModels.map((m) => ({ ...m, productCategory }));
     }
   } catch (err) {
     logger.warn({ err }, 'MediaWiki API fallback failed, using HTML scraping');
   }
 
   // Fallback: scrape category HTML pages
-  let nextUrl: string | null = CATEGORY_URL;
+  let nextUrl: string | null = categoryUrl;
 
   while (nextUrl) {
     logger.debug(`Scraping category page: ${nextUrl}`);
     const html = await fetchHtml(nextUrl);
     const $ = cheerio.load(html);
 
-    // Guitar model links are in the category members list
+    // Model links are in the category members list
     $('.category-page__member-link').each((_, el) => {
       const href = $(el).attr('href');
       const title = $(el).text().trim();
@@ -145,6 +152,7 @@ export async function fetchGuitarModelUrls(): Promise<Array<{ title: string; url
         models.push({
           title,
           url: href.startsWith('http') ? href : `${WIKI_BASE}${href}`,
+          productCategory,
         });
       }
     });
@@ -157,6 +165,7 @@ export async function fetchGuitarModelUrls(): Promise<Array<{ title: string; url
         models.push({
           title,
           url: href.startsWith('http') ? href : `${WIKI_BASE}${href}`,
+          productCategory,
         });
       }
     });
@@ -182,12 +191,12 @@ export async function fetchGuitarModelUrls(): Promise<Array<{ title: string; url
     return true;
   });
 
-  logger.info(`Found ${unique.length} guitar models via HTML scraping`);
+  logger.info(`Found ${unique.length} models from ${cmtitle} via HTML scraping`);
   return unique;
 }
 
 /** Fetch model URLs using the MediaWiki API. */
-async function fetchModelUrlsViaApi(): Promise<Array<{ title: string; url: string }>> {
+async function fetchModelUrlsViaApi(cmtitle: string): Promise<Array<{ title: string; url: string }>> {
   const models: Array<{ title: string; url: string }> = [];
   let cmcontinue: string | undefined;
 
@@ -195,7 +204,7 @@ async function fetchModelUrlsViaApi(): Promise<Array<{ title: string; url: strin
     const params = new URLSearchParams({
       action: 'query',
       list: 'categorymembers',
-      cmtitle: 'Category:Guitar_models',
+      cmtitle,
       cmlimit: '500',
       cmtype: 'page',
       format: 'json',
@@ -225,12 +234,23 @@ async function fetchModelUrlsViaApi(): Promise<Array<{ title: string; url: strin
   return models;
 }
 
+/** Get all guitar model page URLs from the Category:Guitar_models category. */
+export async function fetchGuitarModelUrls(): Promise<Array<{ title: string; url: string; productCategory: ProductCategory }>> {
+  return fetchModelUrlsFromCategory(GUITAR_CATEGORY_URL, 'Category:Guitar_models', 'guitar');
+}
+
+/** Get all bass model page URLs from the Category:Bass_models category. */
+export async function fetchBassModelUrls(): Promise<Array<{ title: string; url: string; productCategory: ProductCategory }>> {
+  return fetchModelUrlsFromCategory(BASS_CATEGORY_URL, 'Category:Bass_models', 'bass');
+}
+
 /**
  * Scrape a single guitar page and extract structured data.
  */
 export async function scrapeGuitarPage(
   url: string,
   title: string,
+  productCategory: ProductCategory,
 ): Promise<ScrapedGuitar | null> {
   try {
     const html = await fetchPageHtml(title);
@@ -313,7 +333,7 @@ export async function scrapeGuitarPage(
     const descriptionHtml = descriptionParts.length > 0 ? descriptionParts.join('\n') : null;
 
     // Map raw attributes to structured fields
-    const guitar = mapRawToGuitar(rawAttributes, title, url, imageUrls, descriptionHtml);
+    const guitar = mapRawToGuitar(rawAttributes, title, url, imageUrls, descriptionHtml, productCategory);
     return guitar;
   } catch (err) {
     logger.error({ err }, `Failed to scrape ${url}`);
@@ -407,6 +427,7 @@ function mapRawToGuitar(
   url: string,
   imageUrls: string[],
   descriptionHtml: string | null,
+  productCategory: ProductCategory,
 ): ScrapedGuitar {
   // Build a case-insensitive lookup
   const lookup = new Map<string, string>();
@@ -448,6 +469,7 @@ function mapRawToGuitar(
   return {
     model,
     name: model,
+    productCategory,
     series,
     bodyType: get('body type', 'body shape', 'body style'),
     bodyMaterial: rawBody ? normalizeBodyMaterial(rawBody) : null,
@@ -491,22 +513,35 @@ function mapRawToGuitar(
 }
 
 /**
- * Run the full scrape: fetch model list, scrape each page with concurrency control.
+ * Run the full scrape: fetch model list from guitar and bass categories,
+ * scrape each page with concurrency control.
  */
 export async function scrapeAllGuitars(
   onProgress?: (current: number, total: number) => void,
 ): Promise<ScrapedGuitar[]> {
-  const modelUrls = await fetchGuitarModelUrls();
+  const [guitarUrls, bassUrls] = await Promise.all([
+    fetchGuitarModelUrls(),
+    fetchBassModelUrls(),
+  ]);
+
+  // Merge and deduplicate by URL
+  const seen = new Set<string>();
+  const modelUrls = [...guitarUrls, ...bassUrls].filter(({ url }) => {
+    if (seen.has(url)) return false;
+    seen.add(url);
+    return true;
+  });
+
   const results: ScrapedGuitar[] = [];
   const concurrency = env.scraper.concurrency;
 
-  logger.info(`Starting scrape of ${modelUrls.length} guitar models (concurrency: ${concurrency})`);
+  logger.info(`Starting scrape of ${modelUrls.length} models (${guitarUrls.length} guitars, ${bassUrls.length} basses, concurrency: ${concurrency})`);
 
   // Process in batches to respect concurrency limits
   for (let i = 0; i < modelUrls.length; i += concurrency) {
     const batch = modelUrls.slice(i, i + concurrency);
     const batchResults = await Promise.all(
-      batch.map(({ url, title }) => scrapeGuitarPage(url, title)),
+      batch.map(({ url, title, productCategory }) => scrapeGuitarPage(url, title, productCategory)),
     );
 
     for (const result of batchResults) {
@@ -521,6 +556,6 @@ export async function scrapeAllGuitars(
     }
   }
 
-  logger.info(`Scrape complete: ${results.length}/${modelUrls.length} guitars extracted`);
+  logger.info(`Scrape complete: ${results.length}/${modelUrls.length} models extracted`);
   return results;
 }

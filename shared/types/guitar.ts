@@ -2,6 +2,8 @@
  * Core guitar domain types shared between backend and frontend.
  */
 
+export type ProductCategory = 'guitar' | 'bass';
+
 /** All known Ibanez series identifiers. */
 export type GuitarSeries =
   | 'RG'
@@ -78,6 +80,7 @@ export interface GuitarDto {
   model: string;
   name: string;
   slug: string;
+  productCategory: ProductCategory | null;
   series: string | null;
   bodyType: string | null;
   bodyMaterial: string | null;

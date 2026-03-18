@@ -2,7 +2,7 @@
  * API request/response types shared between backend and frontend.
  */
 
-import type { GuitarDto, GuitarDetailDto } from './guitar';
+import type { GuitarDto, GuitarDetailDto, ProductCategory } from './guitar';
 
 // ---- Pagination ----
 
@@ -25,6 +25,7 @@ export interface PaginatedResponse<T> {
 
 export interface GuitarFilterParams extends PaginationParams {
   search?: string;
+  productCategory?: ProductCategory | ProductCategory[];
   series?: string | string[];
   bodyType?: string | string[];
   bodyMaterial?: string | string[];
@@ -59,6 +60,7 @@ export interface FacetBucket {
 
 /** All available facets returned alongside guitar list results. */
 export interface GuitarFacets {
+  productCategory: FacetBucket[];
   series: FacetBucket[];
   bodyType: FacetBucket[];
   bodyMaterial: FacetBucket[];

@@ -241,6 +241,7 @@ export class GuitarService {
       conditions.push({ [field]: { $in: values } } as FilterQuery<Guitar>);
     };
 
+    arrayFilter('productCategory', params.productCategory as string | string[] | undefined);
     arrayFilter('series', params.series);
     arrayFilter('bodyType', params.bodyType);
     arrayFilter('neckType', params.neckType);
@@ -293,6 +294,7 @@ export class GuitarService {
 
     // ---- Standard scalar field facets ----
     const scalarFields = [
+      'product_category',
       'series',
       'body_type',
       'neck_type',
@@ -374,6 +376,7 @@ export class GuitarService {
       model: guitar.model,
       name: guitar.name,
       slug: guitar.slug,
+      productCategory: guitar.productCategory,
       series: guitar.series,
       bodyType: guitar.bodyType,
       bodyMaterial: guitar.bodyMaterial,

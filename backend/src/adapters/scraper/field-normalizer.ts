@@ -621,10 +621,13 @@ export function extractNumberOfFretsList(raw: string | null): number[] {
  */
 export function isBassModel(model: string, series: string | null): boolean {
   const bassSeries = ['SR', 'BTB', 'GSR', 'GB', 'GWB', 'ATK', 'SDGR', 'EDB', 'EDC', 'SRX', 'SRT', 'SRF', 'SRC', 'SRH', 'EHB', 'SRMS', 'SRMD', 'SRAS'];
+  // When checking prefix matches, require that the remainder is empty or starts with a digit
+  // to avoid false positives like SRG (guitar) matching the SR (bass) prefix
+  const matchesBass = (s: string, b: string) => s === b || (s.startsWith(b) && /^\d/.test(s.slice(b.length)));
   const s = (series ?? '').toUpperCase();
-  if (bassSeries.some((b) => s === b || s.startsWith(b))) return true;
+  if (bassSeries.some((b) => matchesBass(s, b))) return true;
   // Also check model prefix directly
   const modelUpper = model.toUpperCase();
-  if (bassSeries.some((b) => modelUpper.startsWith(b))) return true;
+  if (bassSeries.some((b) => matchesBass(modelUpper, b))) return true;
   return false;
 }

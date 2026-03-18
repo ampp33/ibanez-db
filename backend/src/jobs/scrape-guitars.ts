@@ -58,6 +58,7 @@ async function processGuitar(
   const guitar = await service.upsertGuitar({
     model: scraped.model,
     name: scraped.name,
+    productCategory: scraped.productCategory,
     series: scraped.series,
     bodyType: scraped.bodyType,
     bodyMaterial: scraped.bodyMaterial,
