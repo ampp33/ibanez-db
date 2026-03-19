@@ -38,6 +38,9 @@ export default defineComponent({
   watch: {
     open(val: boolean): void {
       document.body.style.overflow = val ? 'hidden' : '';
+      if (val) {
+        this.currentIndex = this.initialIndex;
+      }
     },
     initialIndex(val: number): void {
       this.currentIndex = val;

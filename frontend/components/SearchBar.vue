@@ -1,13 +1,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { Search, X } from 'lucide-vue-next';
+import { Input } from '~/components/ui/input';
 
 /**
  * Search input with debounced text entry, using shadcn-vue styling.
  */
 export default defineComponent({
   name: 'SearchBar',
-  components: { Search, X },
+  components: { Search, X, Input },
   props: {
     modelValue: {
       type: String,

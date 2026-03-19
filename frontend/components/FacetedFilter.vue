@@ -1,6 +1,7 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue';
 import { ChevronDown } from 'lucide-vue-next';
+import { Checkbox } from '~/components/ui/checkbox';
 import type { FacetBucket } from '../types';
 
 /**
@@ -9,7 +10,7 @@ import type { FacetBucket } from '../types';
  */
 export default defineComponent({
   name: 'FacetedFilter',
-  components: { ChevronDown },
+  components: { ChevronDown, Checkbox },
   props: {
     label: {
       type: String,
@@ -106,7 +107,7 @@ export default defineComponent({
         class="flex items-center gap-2 rounded-sm px-1 py-1 text-sm cursor-pointer hover:bg-accent transition-colors"
         @click="toggleValue(bucket.value)"
       >
-        <Checkbox :checked="isSelected(bucket.value)" />
+        <Checkbox :checked="isSelected(bucket.value)" class="pointer-events-none" />
         <span class="flex-1 truncate">{{ bucket.value }}</span>
         <span class="text-xs tabular-nums text-muted-foreground">{{ bucket.count }}</span>
       </div>

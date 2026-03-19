@@ -1,6 +1,7 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue';
 import { X } from 'lucide-vue-next';
+import { Badge } from '~/components/ui/badge';
 import type { ActiveFilter } from '../types';
 
 /**
@@ -8,7 +9,7 @@ import type { ActiveFilter } from '../types';
  */
 export default defineComponent({
   name: 'FilterTag',
-  components: { X },
+  components: { X, Badge },
   props: {
     filter: {
       type: Object as PropType<ActiveFilter>,
@@ -25,7 +26,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <Badge variant="secondary" class="rounded-full gap-1">
+  <Badge variant="secondary" class="rounded-full gap-1 border-border">
     <span class="text-muted-foreground">{{ filter.label }}:</span>
     <span>{{ filter.value }}</span>
     <button

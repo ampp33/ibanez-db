@@ -1,6 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { ArrowLeft, ExternalLink } from 'lucide-vue-next';
+import { Badge } from '~/components/ui/badge';
 import type { GuitarDetailDto } from '../../types';
 
 /** Spec table fields to display in order. */
@@ -27,7 +28,7 @@ const SPEC_FIELDS: Array<{ key: keyof GuitarDetailDto; label: string }> = [
 
 export default defineComponent({
   name: 'GuitarDetailPage',
-  components: { ArrowLeft, ExternalLink },
+  components: { ArrowLeft, ExternalLink, Badge },
   setup() {
     const { fetchGuitar } = useGuitarApi();
     const route = useRoute();
@@ -162,26 +163,27 @@ export default defineComponent({
         <div>
           <!-- Quick info badges -->
           <div class="flex flex-wrap gap-2 mb-6">
-            <Badge
+            <div
               v-if="guitar.series"
-              class="rounded-full bg-primary/10 text-primary border-primary/20"
+              class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-primary/10 text-primary border-primary/20"
             >
               {{ guitar.series }} Series
-            </Badge>
-            <Badge
+            </div>
+            <div
               v-if="guitar.tremolo !== null"
+              class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold"
               :class="guitar.tremolo
-                ? 'rounded-full bg-blue-500/10 text-blue-700 border-blue-500/20'
-                : 'rounded-full bg-secondary text-secondary-foreground'"
+                ? 'bg-blue-500/10 text-blue-700 border-blue-500/20'
+                : 'bg-secondary text-secondary-foreground'"
             >
               {{ guitar.tremolo ? 'Tremolo' : 'Fixed Bridge' }}
-            </Badge>
-            <Badge
+            </div>
+            <div
               v-if="guitar.countryOfOrigin"
-              class="rounded-full bg-green-500/10 text-green-700 border-green-500/20"
+              class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-500/10 text-green-700 border-green-500/20"
             >
               {{ guitar.countryOfOrigin }}
-            </Badge>
+            </div>
           </div>
 
           <!-- Spec table -->
@@ -200,7 +202,7 @@ export default defineComponent({
                 v-for="finish in finishList"
                 :key="finish"
                 variant="secondary"
-                class="rounded-full"
+                class="rounded-full border-border font-medium"
               >
                 {{ finish }}
               </Badge>

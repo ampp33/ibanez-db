@@ -1,6 +1,7 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue';
 import { ImageOff } from 'lucide-vue-next';
+import { Badge } from '~/components/ui/badge';
 import type { GuitarDto } from '../types';
 
 /**
@@ -8,7 +9,7 @@ import type { GuitarDto } from '../types';
  */
 export default defineComponent({
   name: 'GuitarCard',
-  components: { ImageOff },
+  components: { ImageOff, Badge },
   props: {
     guitar: {
       type: Object as PropType<GuitarDto>,

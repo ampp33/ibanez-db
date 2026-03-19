@@ -1,8 +1,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { Skeleton } from '~/components/ui/skeleton';
 
 export default defineComponent({
   name: 'GuitarCardSkeleton',
+  components: { Skeleton },
 });
 </script>
 

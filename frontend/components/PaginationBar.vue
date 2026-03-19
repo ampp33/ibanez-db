@@ -1,8 +1,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { Button } from '~/components/ui/button';
 
 export default defineComponent({
   name: 'PaginationBar',
+  components: { Button },
   props: {
     page: {
       type: Number,
