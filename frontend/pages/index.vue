@@ -15,15 +15,33 @@ export default defineComponent({
   components: { SlidersHorizontal, Search, X },
   setup() {
     const { fetchGuitars } = useGuitarApi();
-    return { fetchGuitars };
+    const route = useRoute();
+    const router = useRouter();
+
+    // Parse initial state from URL so data() can use it on first mount.
+    // This means navigating back from a guitar detail page restores the
+    // exact search state the user was on.
+    const q = route.query;
+    const initialSearch = typeof q.search === 'string' ? q.search : '';
+    const initialPage = q.page ? Math.max(1, parseInt(String(q.page), 10) || 1) : 1;
+    const initialFilters: Record<string, string[]> = {};
+    for (const cat of FACET_CATEGORIES) {
+      const val = q[cat.field as string];
+      if (val && typeof val === 'string') {
+        initialFilters[cat.field] = val.split(',').filter(Boolean);
+      }
+    }
+
+    return { fetchGuitars, router, initialSearch, initialPage, initialFilters };
   },
   data() {
     return {
       guitars: [] as GuitarDto[],
       facets: {} as Partial<GuitarFacets>,
-      filters: {} as Record<string, string[]>,
-      search: '',
-      page: 1,
+      // Seed from URL-parsed values returned by setup()
+      filters: this.initialFilters as unknown as Record<string, string[]>,
+      search: this.initialSearch as unknown as string,
+      page: this.initialPage as unknown as number,
       limit: 24,
       total: 0,
       totalPages: 0,
@@ -70,15 +88,32 @@ export default defineComponent({
   watch: {
     filterParams: {
       handler(): void {
+        this.syncUrl();
         this.loadGuitars();
       },
       deep: true,
     },
   },
   mounted() {
+    // Initial load. data() is already seeded from the URL, so filterParams
+    // hasn't changed and the watcher won't fire — call loadGuitars() directly.
     this.loadGuitars();
   },
   methods: {
+    /** Mirror current filter/search/page state into the URL query string. */
+    syncUrl(): void {
+      const query: Record<string, string> = {};
+      if (this.search) query.search = this.search;
+      if (this.page > 1) query.page = String(this.page);
+      for (const cat of this.facetCategories) {
+        const vals = this.filters[cat.field];
+        if (vals && vals.length > 0) {
+          query[cat.field] = vals.join(',');
+        }
+      }
+      // replace (not push) so filter tweaks don't pile up in browser history
+      this.router.replace({ query });
+    },
     async loadGuitars(): Promise<void> {
       this.loading = true;
       this.error = null;
