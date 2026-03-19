@@ -39,6 +39,8 @@ export async function guitarRoutes(
       tremolo: asBool(query.tremolo),
       productionStart: asInt(query.productionStart),
       productionEnd: asInt(query.productionEnd),
+      productionYearMin: asInt(query.productionYearMin),
+      productionYearMax: asInt(query.productionYearMax),
       sortBy: asString(query.sortBy) as GuitarFilterParams['sortBy'],
       sortOrder: asString(query.sortOrder) as GuitarFilterParams['sortOrder'],
     };

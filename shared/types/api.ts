@@ -42,6 +42,9 @@ export interface GuitarFilterParams extends PaginationParams {
   numberOfStrings?: number | number[];
   productionStart?: number;
   productionEnd?: number;
+  /** Overlap range filter: matches guitars whose production period intersects [min, max]. */
+  productionYearMin?: number;
+  productionYearMax?: number;
   sortBy?: GuitarSortField;
   sortOrder?: 'asc' | 'desc';
 }

@@ -220,6 +220,28 @@ export class GuitarRepository {
       conditions.push({ productionEnd: { $lte: params.productionEnd } } as FilterQuery<Guitar>);
     }
 
+    // Year-range overlap filter: guitar's [productionStart, productionEnd] must overlap [min, max].
+    // Requires a non-null productionStart; guitars with no year data are excluded when filter is active.
+    if (params.productionYearMin !== undefined || params.productionYearMax !== undefined) {
+      conditions.push({ productionStart: { $ne: null } } as FilterQuery<Guitar>);
+
+      if (params.productionYearMax !== undefined) {
+        // Guitar must have started by the end of the selected range
+        conditions.push({ productionStart: { $lte: params.productionYearMax } } as FilterQuery<Guitar>);
+      }
+
+      if (params.productionYearMin !== undefined) {
+        // Guitar must still be in production at the start of the selected range:
+        // ended on or after min, or hasn't ended (null = still in production)
+        conditions.push({
+          $or: [
+            { productionEnd: { $gte: params.productionYearMin } },
+            { productionEnd: null },
+          ],
+        } as FilterQuery<Guitar>);
+      }
+    }
+
     if (arrayFilterIds !== undefined) {
       if (arrayFilterIds.length === 0) {
         conditions.push({ id: null } as FilterQuery<Guitar>);

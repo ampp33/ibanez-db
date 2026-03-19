@@ -10,6 +10,9 @@ import type {
 } from '../types';
 import { FACET_CATEGORIES } from '../config/facets';
 
+const YEAR_MIN = 1957;
+const YEAR_MAX = new Date().getFullYear();
+
 export default defineComponent({
   name: 'SearchPage',
   components: { SlidersHorizontal, Search, X },
@@ -18,9 +21,6 @@ export default defineComponent({
     const route = useRoute();
     const router = useRouter();
 
-    // Parse initial state from URL so data() can use it on first mount.
-    // This means navigating back from a guitar detail page restores the
-    // exact search state the user was on.
     const q = route.query;
     const initialSearch = typeof q.search === 'string' ? q.search : '';
     const initialPage = q.page ? Math.max(1, parseInt(String(q.page), 10) || 1) : 1;
@@ -31,26 +31,37 @@ export default defineComponent({
         initialFilters[cat.field] = val.split(',').filter(Boolean);
       }
     }
+    const initialYearMin = q.yearMin ? Math.max(YEAR_MIN, parseInt(String(q.yearMin), 10) || YEAR_MIN) : YEAR_MIN;
+    const initialYearMax = q.yearMax ? Math.min(YEAR_MAX, parseInt(String(q.yearMax), 10) || YEAR_MAX) : YEAR_MAX;
 
-    return { fetchGuitars, router, initialSearch, initialPage, initialFilters };
+    return { fetchGuitars, router, initialSearch, initialPage, initialFilters, initialYearMin, initialYearMax };
   },
   data() {
     return {
       guitars: [] as GuitarDto[],
       facets: {} as Partial<GuitarFacets>,
-      // Seed from URL-parsed values returned by setup()
       filters: this.initialFilters as unknown as Record<string, string[]>,
       search: this.initialSearch as unknown as string,
       page: this.initialPage as unknown as number,
+      yearMin: this.initialYearMin as unknown as number,
+      yearMax: this.initialYearMax as unknown as number,
       limit: 24,
       total: 0,
       totalPages: 0,
       loading: false,
       error: null as string | null,
       facetCategories: FACET_CATEGORIES,
+      yearSliderMin: YEAR_MIN,
+      yearSliderMax: YEAR_MAX,
     };
   },
   computed: {
+    yearRange(): [number, number] {
+      return [this.yearMin, this.yearMax];
+    },
+    yearRangeActive(): boolean {
+      return this.yearMin > YEAR_MIN || this.yearMax < YEAR_MAX;
+    },
     activeFilters(): ActiveFilter[] {
       const tags: ActiveFilter[] = [];
       for (const cat of this.facetCategories) {
@@ -58,6 +69,12 @@ export default defineComponent({
         for (const value of selected) {
           tags.push({ field: cat.field, label: cat.label, value });
         }
+      }
+      if (this.yearRangeActive) {
+        const label = this.yearMin === this.yearMax
+          ? String(this.yearMin)
+          : `${this.yearMin} – ${this.yearMax}`;
+        tags.push({ field: 'yearRange', label: 'Year', value: label });
       }
       if (this.search) {
         tags.push({ field: 'search', label: 'Search', value: this.search });
@@ -75,13 +92,14 @@ export default defineComponent({
         sortOrder: 'asc',
       };
       if (this.search) params.search = this.search;
-
       for (const cat of this.facetCategories) {
         const selected = this.filters[cat.field];
         if (selected && selected.length > 0) {
           (params as Record<string, unknown>)[cat.field] = selected;
         }
       }
+      if (this.yearMin > YEAR_MIN) params.productionYearMin = this.yearMin;
+      if (this.yearMax < YEAR_MAX) params.productionYearMax = this.yearMax;
       return params;
     },
   },
@@ -95,23 +113,19 @@ export default defineComponent({
     },
   },
   mounted() {
-    // Initial load. data() is already seeded from the URL, so filterParams
-    // hasn't changed and the watcher won't fire — call loadGuitars() directly.
     this.loadGuitars();
   },
   methods: {
-    /** Mirror current filter/search/page state into the URL query string. */
     syncUrl(): void {
       const query: Record<string, string> = {};
       if (this.search) query.search = this.search;
       if (this.page > 1) query.page = String(this.page);
       for (const cat of this.facetCategories) {
         const vals = this.filters[cat.field];
-        if (vals && vals.length > 0) {
-          query[cat.field] = vals.join(',');
-        }
+        if (vals && vals.length > 0) query[cat.field] = vals.join(',');
       }
-      // replace (not push) so filter tweaks don't pile up in browser history
+      if (this.yearMin > YEAR_MIN) query.yearMin = String(this.yearMin);
+      if (this.yearMax < YEAR_MAX) query.yearMax = String(this.yearMax);
       this.router.replace({ query });
     },
     async loadGuitars(): Promise<void> {
@@ -133,9 +147,20 @@ export default defineComponent({
       this.filters = { ...this.filters, [field]: values };
       this.page = 1;
     },
+    handleYearRangeUpdate(range: [number, number]): void {
+      this.yearMin = range[0];
+      this.yearMax = range[1];
+      this.page = 1;
+    },
     handleRemoveFilter(filter: ActiveFilter): void {
       if (filter.field === 'search') {
         this.search = '';
+        return;
+      }
+      if (filter.field === 'yearRange') {
+        this.yearMin = YEAR_MIN;
+        this.yearMax = YEAR_MAX;
+        this.page = 1;
         return;
       }
       const current = [...(this.filters[filter.field] ?? [])];
@@ -149,6 +174,8 @@ export default defineComponent({
     clearAllFilters(): void {
       this.filters = {};
       this.search = '';
+      this.yearMin = YEAR_MIN;
+      this.yearMax = YEAR_MAX;
       this.page = 1;
     },
     handleSearchUpdate(value: string): void {
@@ -204,6 +231,16 @@ export default defineComponent({
             <SlidersHorizontal class="h-4 w-4 text-muted-foreground" />
             <h2 class="text-sm font-semibold tracking-tight">Filters</h2>
           </div>
+
+          <!-- Year range slider -->
+          <YearRangeFilter
+            :min="yearSliderMin"
+            :max="yearSliderMax"
+            :model-value="yearRange"
+            @update:model-value="handleYearRangeUpdate"
+          />
+
+          <!-- Facet filters -->
           <FacetedFilter
             v-for="cat in facetCategories"
             :key="cat.field"
@@ -238,10 +275,7 @@ export default defineComponent({
         </div>
 
         <!-- Loading skeleton -->
-        <div
-          v-if="loading"
-          class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
-        >
+        <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           <GuitarCardSkeleton v-for="i in 6" :key="i" />
         </div>
 
@@ -250,11 +284,7 @@ export default defineComponent({
           v-else-if="guitars.length > 0"
           class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
         >
-          <GuitarCard
-            v-for="guitar in guitars"
-            :key="guitar.id"
-            :guitar="guitar"
-          />
+          <GuitarCard v-for="guitar in guitars" :key="guitar.id" :guitar="guitar" />
         </div>
 
         <!-- Empty state -->
