@@ -1,11 +1,23 @@
+<script lang="ts">
+import { defineComponent } from 'vue';
+import ReportProblemModal from '~/components/ReportProblemModal.vue';
+
+export default defineComponent({
+  name: 'App',
+  components: { ReportProblemModal },
+});
+</script>
+
 <template>
   <div class="min-h-screen bg-background font-sans antialiased">
     <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div class="container flex h-14 items-center">
+      <div class="container flex h-14 items-center justify-between">
         <NuxtLink to="/" class="flex items-center space-x-2">
           <span class="text-xl font-bold tracking-tight">Ibanez</span>
           <span class="text-sm font-medium text-muted-foreground">Guitar Database</span>
         </NuxtLink>
+
+        <ReportProblemModal />
       </div>
     </header>
 

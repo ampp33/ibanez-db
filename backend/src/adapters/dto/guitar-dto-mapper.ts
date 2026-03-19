@@ -37,6 +37,7 @@ export class GuitarDtoMapper {
       middlePickup: guitar.middlePickup,
       bridgePickup: guitar.bridgePickup,
       bridgeType: guitar.bridgeType,
+      bridgeTypeSimple: guitar.bridgeTypeSimple,
       tremolo: guitar.tremolo,
       hardwareColor: guitar.hardwareColor,
       finishes: guitar.finishes ?? [],

@@ -31,6 +31,7 @@ export async function guitarRoutes(
       fretboardMaterial: asStringArray(query.fretboardMaterial),
       pickupConfiguration: asStringArray(query.pickupConfiguration),
       bridgeType: asStringArray(query.bridgeType),
+      bridgeTypeSimple: asStringArray(query.bridgeTypeSimple) as GuitarFilterParams['bridgeTypeSimple'],
       hardwareColor: asStringArray(query.hardwareColor),
       countryOfOrigin: asStringArray(query.countryOfOrigin),
       numberOfFrets: asIntArray(query.numberOfFrets),

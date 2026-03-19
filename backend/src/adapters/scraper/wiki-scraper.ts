@@ -34,6 +34,7 @@ export interface ScrapedGuitar {
   middlePickup: string | null;
   bridgePickup: string | null;
   bridgeType: string | null;
+  bridgeTypeSimple: 'tremolo' | 'fixed' | null;
   tremolo: boolean | null;
   hardwareColor: string | null;
   finishes: string[];

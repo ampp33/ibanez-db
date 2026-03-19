@@ -56,23 +56,32 @@ export type PickupConfiguration =
   | 'P90'
   | string;
 
+export type BridgeTypeSimple = 'fixed' | 'tremolo';
+
 export type BridgeType =
-  | 'Edge'
-  | 'Edge Zero'
-  | 'Edge Zero II'
-  | 'Edge III'
-  | 'Lo-Pro Edge'
-  | 'Lo-TRS II'
-  | 'Zero Resistance'
-  | 'Gibraltar Standard II'
+  | 'Edge Tremolo'
+  | 'Lo-Pro Edge Tremolo'
+  | 'Edge Pro Tremolo'
+  | 'Edge Pro II Tremolo'
+  | 'Edge Zero Tremolo'
+  | 'Edge Zero II Tremolo'
+  | 'Edge III Tremolo'
+  | 'Lo-TRS Tremolo'
+  | 'Lo-TRS II Tremolo'
+  | 'FAT-6 Tremolo'
+  | 'ZR Tremolo'
+  | 'AZ Tremolo'
+  | 'Floyd Rose Tremolo'
+  | 'Tremolo'
   | 'Gibraltar'
-  | 'Fixed'
-  | 'Tight-End R'
+  | 'Gibraltar Standard'
+  | 'Gibraltar Standard II'
+  | 'Gibraltar Standard 4'
   | 'Tight-End'
-  | 'FAT-6'
-  | 'AZ-1'
-  | 'T1502'
+  | 'Tight-End R'
   | 'Mono-rail'
+  | 'Fixed'
+  | 'T1502'
   | string;
 
 export interface GuitarDto {
@@ -101,6 +110,7 @@ export interface GuitarDto {
   middlePickup: string | null;
   bridgePickup: string | null;
   bridgeType: string | null;
+  bridgeTypeSimple: BridgeTypeSimple | null;
   tremolo: boolean | null;
   hardwareColor: string | null;
   finishes: string[];

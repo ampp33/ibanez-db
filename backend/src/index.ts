@@ -9,6 +9,7 @@ import { MinioStorageAdapter } from './adapters/storage/minio.adapter';
 import { GuitarService } from './services/guitar.service';
 import { guitarRoutes } from './api/routes/guitars';
 import { healthRoutes } from './api/routes/health';
+import { reportRoutes } from './api/routes/reports';
 import { runScrape } from './jobs/scrape-guitars';
 
 async function main(): Promise<void> {
@@ -46,6 +47,7 @@ async function main(): Promise<void> {
 
   // Register routes
   await fastify.register(healthRoutes);
+  await fastify.register(reportRoutes);
   await fastify.register(async (instance) => {
     const guitarService = new GuitarService(orm.em.fork(), storage);
 

@@ -207,28 +207,109 @@ export const HARDWARE_COLOR_MAP: Record<string, string> = {
 };
 
 export const BRIDGE_TYPE_MAP: Record<string, string> = {
-  edge: 'Edge',
-  'edge zero': 'Edge Zero',
-  'edge zero ii': 'Edge Zero II',
-  'edge-zero ii': 'Edge Zero II',
-  'edge iii': 'Edge III',
-  'edge pro': 'Edge Pro',
-  'edge pro ii': 'Edge Pro II',
-  'lo-pro edge': 'Lo-Pro Edge',
-  'lo pro edge': 'Lo-Pro Edge',
-  'lo-trs ii': 'Lo-TRS II',
-  'lo trs ii': 'Lo-TRS II',
+  // ---- Tremolo bridges (all normalized names include "Tremolo") ----
+
+  // Edge family
+  'edge': 'Edge Tremolo',
+  'edge tremolo': 'Edge Tremolo',
+  'original edge': 'Edge Tremolo',
+  'lo-pro edge': 'Lo-Pro Edge Tremolo',
+  'lo pro edge': 'Lo-Pro Edge Tremolo',
+  'lo-pro edge tremolo': 'Lo-Pro Edge Tremolo',
+  'edge pro': 'Edge Pro Tremolo',
+  'edge pro tremolo': 'Edge Pro Tremolo',
+  'edge pro ii': 'Edge Pro II Tremolo',
+  'edge pro ii tremolo': 'Edge Pro II Tremolo',
+  'edge zero': 'Edge Zero Tremolo',
+  'edge zero tremolo': 'Edge Zero Tremolo',
+  'edge zero ii': 'Edge Zero II Tremolo',
+  'edge-zero ii': 'Edge Zero II Tremolo',
+  'edge zero ii tremolo': 'Edge Zero II Tremolo',
+  'edge iii': 'Edge III Tremolo',
+  'edge iii tremolo': 'Edge III Tremolo',
+  'edge s': 'Edge Tremolo',
+
+  // Lo-TRS family
+  'lo-trs': 'Lo-TRS Tremolo',
+  'lo trs': 'Lo-TRS Tremolo',
+  'lo-trs tremolo': 'Lo-TRS Tremolo',
+  'lo-trs ii': 'Lo-TRS II Tremolo',
+  'lo trs ii': 'Lo-TRS II Tremolo',
+  'lo-trs ii tremolo': 'Lo-TRS II Tremolo',
+
+  // FAT-6
+  'fat-6': 'FAT-6 Tremolo',
+  'fat 6': 'FAT-6 Tremolo',
+  'fat-6 tremolo': 'FAT-6 Tremolo',
+
+  // ZR (Zero Resistance)
+  'zr': 'ZR Tremolo',
+  'zr tremolo': 'ZR Tremolo',
+  'zero resistance': 'ZR Tremolo',
+
+  // AZ / AZ-1
+  'az-1': 'AZ Tremolo',
+  'az1': 'AZ Tremolo',
+  'az tremolo': 'AZ Tremolo',
+
+  // Floyd Rose
+  'floyd rose': 'Floyd Rose Tremolo',
+  'floyd rose tremolo': 'Floyd Rose Tremolo',
+  'floyd rose original': 'Floyd Rose Tremolo',
+  'floyd rose licensed': 'Floyd Rose Tremolo',
+  'double locking tremolo': 'Floyd Rose Tremolo',
+  'fr tremolo': 'Floyd Rose Tremolo',
+
+  // Generic tremolo
+  'tremolo': 'Tremolo',
+  'double tremolo': 'Tremolo',
+  'vibrato': 'Tremolo',
+
+  // ---- Fixed bridges (no "Tremolo" in name) ----
+
+  // Gibraltar family
+  'gibraltar': 'Gibraltar',
+  'gibraltar standard': 'Gibraltar Standard',
   'gibraltar standard ii': 'Gibraltar Standard II',
-  gibraltar: 'Gibraltar',
-  fixed: 'Fixed',
-  'tight-end r': 'Tight-End R',
-  'tight end r': 'Tight-End R',
+  'gibraltar standard 4': 'Gibraltar Standard 4',
+  'gibraltar standard 4b': 'Gibraltar Standard 4B',
+  'gibraltar bass': 'Gibraltar Bass',
+  'gibraltar bass ii': 'Gibraltar Bass II',
+  'gibraltar plus': 'Gibraltar Plus',
+
+  // Tight-End family
   'tight-end': 'Tight-End',
   'tight end': 'Tight-End',
-  'fat-6': 'FAT-6',
-  'fat 6': 'FAT-6',
-  't1502': 'T1502',
+  'tight-end r': 'Tight-End R',
+  'tight end r': 'Tight-End R',
+
+  // Mono-rail (bass)
   'mono-rail': 'Mono-rail',
+  'mono rail': 'Mono-rail',
+  'mono-rail ii': 'Mono-rail II',
+  'mono-rail iii': 'Mono-rail III',
+  'mono-rail iv': 'Mono-rail IV',
+  'mono-rail v': 'Mono-rail V',
+  'mono rail v': 'Mono-rail V',
+
+  // Generic fixed
+  'fixed': 'Fixed',
+  'hardtail': 'Fixed',
+  'hard tail': 'Fixed',
+  'tailpiece': 'Fixed',
+  'stop-bar': 'Fixed',
+  'stopbar': 'Fixed',
+  'stop bar': 'Fixed',
+  'tune-o-matic': 'Tune-o-matic',
+  'tunamatic': 'Tune-o-matic',
+  'tune o matic': 'Tune-o-matic',
+
+  // Model-specific fixed
+  't1502': 'T1502',
+  't106b': 'T106B',
+  't-bar': 'T-bar',
+  'quick change': 'Quick Change',
+  'quick change iii': 'Quick Change III',
 };
 
 export const COUNTRY_MAP: Record<string, string> = {

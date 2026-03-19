@@ -6,7 +6,7 @@ import {
   Collection,
   type Ref,
 } from '@mikro-orm/core';
-import type { ProductCategory } from '@ibanez-db/shared';
+import type { ProductCategory, BridgeTypeSimple } from '@ibanez-db/shared';
 import { v4 as uuid } from 'uuid';
 import { GuitarImage } from './GuitarImage';
 
@@ -97,6 +97,10 @@ export class Guitar {
 
   @Property({ type: 'text', nullable: true })
   bridgeType: string | null = null;
+
+  /** Simplified bridge classification: "fixed" or "tremolo". */
+  @Property({ type: 'text', nullable: true })
+  bridgeTypeSimple: BridgeTypeSimple | null = null;
 
   @Property({ type: 'boolean', nullable: true })
   tremolo: boolean | null = null;

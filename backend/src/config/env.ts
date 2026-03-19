@@ -63,4 +63,15 @@ export const env = {
     delayMs: optionalInt('SCRAPE_DELAY_MS', 500),
     scrapeImages: optionalBool('SCRAPE_IMAGES', true),
   },
+
+  // Email (for "Report a Problem" submissions)
+  email: {
+    host: optional('SMTP_HOST', 'localhost'),
+    port: optionalInt('SMTP_PORT', 587),
+    secure: optionalBool('SMTP_SECURE', false),
+    user: optional('SMTP_USER', ''),
+    pass: optional('SMTP_PASS', ''),
+    from: optional('SMTP_FROM', 'noreply@ibanez-db.local'),
+    adminAddress: optional('ADMIN_EMAIL', ''),
+  },
 } as const;

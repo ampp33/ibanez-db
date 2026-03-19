@@ -62,6 +62,7 @@ export class GuitarRepository {
       'body_type',
       'neck_type',
       'bridge_type',
+      'bridge_type_simple',
       'hardware_color',
       'number_of_strings',
     ] as const;
@@ -199,6 +200,7 @@ export class GuitarRepository {
     arrayFilter('bodyType', params.bodyType);
     arrayFilter('neckType', params.neckType);
     arrayFilter('bridgeType', params.bridgeType);
+    arrayFilter('bridgeTypeSimple', params.bridgeTypeSimple as string | string[] | undefined);
     arrayFilter('hardwareColor', params.hardwareColor);
 
     if (params.numberOfStrings !== undefined) {

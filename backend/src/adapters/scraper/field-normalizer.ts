@@ -109,19 +109,21 @@ export function parseFinishes(raw: string): string[] {
     .filter((f) => f.length > 0 && f.length < 100);
 }
 
+/**
+ * Derive the simple bridge classification from a normalized bridge type string.
+ * Rule: if the normalized name contains "tremolo" → "tremolo", else → "fixed".
+ * Returns null when bridgeType is null.
+ */
+export function deriveBridgeTypeSimple(bridgeType: string | null): 'tremolo' | 'fixed' | null {
+  if (!bridgeType) return null;
+  return bridgeType.toLowerCase().includes('tremolo') ? 'tremolo' : 'fixed';
+}
+
 /** Try to detect if a bridge has a tremolo/vibrato system. */
 export function hasTremolo(bridgeType: string | null): boolean | null {
-  if (!bridgeType) return null;
-  const lower = bridgeType.toLowerCase();
-  const tremoloKeywords = [
-    'edge', 'lo-pro', 'lo-trs', 'floyd', 'tremolo', 'vibrato',
-    'trs', 'fat-6', 'fat 6', 'az-1',
-  ];
-  const fixedKeywords = ['fixed', 'hardtail', 'tight-end', 'gibraltar', 'mono-rail'];
-
-  if (tremoloKeywords.some((kw) => lower.includes(kw))) return true;
-  if (fixedKeywords.some((kw) => lower.includes(kw))) return false;
-  return null;
+  const simple = deriveBridgeTypeSimple(bridgeType);
+  if (simple === null) return null;
+  return simple === 'tremolo';
 }
 
 /**

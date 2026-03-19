@@ -2,7 +2,7 @@
  * API request/response types shared between backend and frontend.
  */
 
-import type { GuitarDto, GuitarDetailDto, ProductCategory } from './guitar';
+import type { GuitarDto, GuitarDetailDto, ProductCategory, BridgeTypeSimple } from './guitar';
 
 // ---- Pagination ----
 
@@ -34,6 +34,7 @@ export interface GuitarFilterParams extends PaginationParams {
   fretboardMaterial?: string | string[];
   pickupConfiguration?: string | string[];
   bridgeType?: string | string[];
+  bridgeTypeSimple?: BridgeTypeSimple | BridgeTypeSimple[];
   hardwareColor?: string | string[];
   countryOfOrigin?: string | string[];
   tremolo?: boolean;
@@ -69,6 +70,7 @@ export interface GuitarFacets {
   fretboardMaterial: FacetBucket[];
   pickupConfiguration: FacetBucket[];
   bridgeType: FacetBucket[];
+  bridgeTypeSimple: FacetBucket[];
   hardwareColor: FacetBucket[];
   countryOfOrigin: FacetBucket[];
   numberOfFrets: FacetBucket[];
