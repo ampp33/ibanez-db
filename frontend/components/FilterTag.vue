@@ -25,9 +25,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div
-    class="inline-flex items-center gap-1 rounded-full border bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition-colors"
-  >
+  <Badge variant="secondary" class="rounded-full gap-1">
     <span class="text-muted-foreground">{{ filter.label }}:</span>
     <span>{{ filter.value }}</span>
     <button
@@ -38,5 +36,5 @@ export default defineComponent({
     >
       <X class="h-3 w-3" />
     </button>
-  </div>
+  </Badge>
 </template>

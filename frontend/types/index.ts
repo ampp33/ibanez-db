@@ -10,7 +10,6 @@ export type {
   GuitarListResponse,
   GuitarFacets,
   FacetBucket,
-  GuitarDetailResponse,
   ApiError,
   PaginatedResponse,
 } from '@ibanez-db/shared';

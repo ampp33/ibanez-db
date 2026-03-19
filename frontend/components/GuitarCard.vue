@@ -65,13 +65,14 @@ export default defineComponent({
       </p>
 
       <div class="mt-3 flex flex-wrap gap-1.5">
-        <span
+        <Badge
           v-for="attr in attributes"
           :key="attr.label"
-          class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium text-muted-foreground transition-colors"
+          variant="secondary"
+          class="rounded-full text-muted-foreground"
         >
           {{ attr.value }}
-        </span>
+        </Badge>
       </div>
     </div>
   </NuxtLink>

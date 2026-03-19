@@ -8,22 +8,7 @@ import type {
   ActiveFilter,
   FacetBucket,
 } from '../types';
-
-/** Facet category definitions for the filter sidebar. */
-const FACET_CATEGORIES: Array<{ field: keyof GuitarFacets; label: string }> = [
-  { field: 'productCategory', label: 'Category' },
-  { field: 'series', label: 'Series' },
-  { field: 'numberOfStrings', label: 'Strings' },
-  { field: 'bodyType', label: 'Body Type' },
-  { field: 'neckType', label: 'Neck Type' },
-  { field: 'pickupConfiguration', label: 'Pickup Config' },
-  { field: 'bridgeType', label: 'Bridge' },
-  { field: 'bodyMaterial', label: 'Body Material' },
-  { field: 'neckMaterial', label: 'Neck Material' },
-  { field: 'fretboardMaterial', label: 'Fretboard' },
-  { field: 'countryOfOrigin', label: 'Country of Origin' },
-  { field: 'numberOfFrets', label: 'Frets' },
-];
+import { FACET_CATEGORIES } from '../config/facets';
 
 export default defineComponent({
   name: 'SearchPage',
@@ -141,15 +126,6 @@ export default defineComponent({
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     },
-    visiblePages(): number[] {
-      const pages: number[] = [];
-      const start = Math.max(1, this.page - 2);
-      const end = Math.min(this.totalPages, this.page + 2);
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-      return pages;
-    },
     getSelectedValues(field: string): string[] {
       return this.filters[field] ?? [];
     },
@@ -231,21 +207,7 @@ export default defineComponent({
           v-if="loading"
           class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
         >
-          <div
-            v-for="i in 6"
-            :key="i"
-            class="rounded-lg border bg-card overflow-hidden"
-          >
-            <div class="aspect-[4/3] bg-muted animate-pulse" />
-            <div class="p-4 space-y-3">
-              <div class="h-4 bg-muted animate-pulse rounded w-3/4" />
-              <div class="h-3 bg-muted animate-pulse rounded w-1/2" />
-              <div class="flex gap-1.5">
-                <div class="h-5 bg-muted animate-pulse rounded-full w-12" />
-                <div class="h-5 bg-muted animate-pulse rounded-full w-16" />
-              </div>
-            </div>
-          </div>
+          <GuitarCardSkeleton v-for="i in 6" :key="i" />
         </div>
 
         <!-- Guitar grid -->
@@ -283,36 +245,12 @@ export default defineComponent({
         </div>
 
         <!-- Pagination -->
-        <nav
+        <PaginationBar
           v-if="totalPages > 1"
-          class="mt-8 flex items-center justify-center gap-1"
-        >
-          <button
-            :disabled="page <= 1"
-            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
-            @click="goToPage(page - 1)"
-          >
-            Previous
-          </button>
-          <button
-            v-for="p in visiblePages()"
-            :key="p"
-            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-9 w-9"
-            :class="p === page
-              ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-              : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'"
-            @click="goToPage(p)"
-          >
-            {{ p }}
-          </button>
-          <button
-            :disabled="page >= totalPages"
-            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
-            @click="goToPage(page + 1)"
-          >
-            Next
-          </button>
-        </nav>
+          :page="page"
+          :total-pages="totalPages"
+          @go-to-page="goToPage"
+        />
       </div>
     </div>
   </div>

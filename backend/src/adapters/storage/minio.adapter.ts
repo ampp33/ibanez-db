@@ -8,19 +8,20 @@ import { logger } from '../../config/logger';
  * Works with both MinIO and AWS S3 by adjusting env config.
  */
 export class MinioStorageAdapter implements StorageAdapter {
-  private client: MinioClient;
-  private bucket: string;
+  private readonly client: MinioClient;
+  private readonly bucket: string;
+  private readonly isS3: boolean;
 
   constructor() {
-    const isS3 = env.storage.provider === 's3';
+    this.isS3 = env.storage.provider === 's3';
 
     this.client = new MinioClient({
       endPoint: env.storage.endpoint,
-      port: isS3 ? undefined : env.storage.port,
-      useSSL: isS3 ? true : env.storage.useSsl,
+      port: this.isS3 ? undefined : env.storage.port,
+      useSSL: this.isS3 ? true : env.storage.useSsl,
       accessKey: env.storage.accessKey,
       secretKey: env.storage.secretKey,
-      ...(isS3 ? { region: env.storage.region } : {}),
+      ...(this.isS3 ? { region: env.storage.region } : {}),
     });
 
     this.bucket = env.storage.bucket;
@@ -63,8 +64,7 @@ export class MinioStorageAdapter implements StorageAdapter {
   }
 
   getPublicUrl(key: string): string {
-    const isS3 = env.storage.provider === 's3';
-    if (isS3) {
+    if (this.isS3) {
       return `https://${this.bucket}.s3.${env.storage.region}.amazonaws.com/${key}`;
     }
     const protocol = env.storage.useSsl ? 'https' : 'http';

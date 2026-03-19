@@ -79,10 +79,6 @@ export interface GuitarListResponse extends PaginatedResponse<GuitarDto> {
   facets: GuitarFacets;
 }
 
-// ---- Guitar detail ----
-
-export type GuitarDetailResponse = GuitarDetailDto;
-
 // ---- Error ----
 
 export interface ApiError {

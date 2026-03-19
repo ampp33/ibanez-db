@@ -45,8 +45,6 @@ function buildQueryString(params: GuitarFilterParams): string {
       if (value.length > 0) {
         searchParams.set(key, value.join(','));
       }
-    } else if (typeof value === 'boolean') {
-      searchParams.set(key, String(value));
     } else {
       searchParams.set(key, String(value));
     }

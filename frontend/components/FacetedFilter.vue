@@ -99,38 +99,14 @@ export default defineComponent({
     </button>
 
     <!-- Content -->
-    <div
-      v-show="isOpen"
-      class="pb-3 space-y-1"
-    >
+    <div v-show="isOpen" class="pb-3 space-y-1">
       <div
         v-for="bucket in visibleBuckets"
         :key="bucket.value"
         class="flex items-center gap-2 rounded-sm px-1 py-1 text-sm cursor-pointer hover:bg-accent transition-colors"
         @click="toggleValue(bucket.value)"
       >
-        <button
-          type="button"
-          class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center transition-colors"
-          :class="isSelected(bucket.value) ? 'bg-primary text-primary-foreground' : 'bg-background'"
-          role="checkbox"
-          :aria-checked="isSelected(bucket.value)"
-        >
-          <svg
-            v-if="isSelected(bucket.value)"
-            xmlns="http://www.w3.org/2000/svg"
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="3"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        </button>
+        <Checkbox :checked="isSelected(bucket.value)" />
         <span class="flex-1 truncate">{{ bucket.value }}</span>
         <span class="text-xs tabular-nums text-muted-foreground">{{ bucket.count }}</span>
       </div>

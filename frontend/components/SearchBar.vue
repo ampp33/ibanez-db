@@ -30,9 +30,8 @@ export default defineComponent({
     if (this.debounceTimer) clearTimeout(this.debounceTimer);
   },
   methods: {
-    handleInput(event: Event): void {
-      const target = event.target as HTMLInputElement;
-      this.localValue = target.value;
+    handleInput(value: string | number): void {
+      this.localValue = String(value);
 
       if (this.debounceTimer) clearTimeout(this.debounceTimer);
       this.debounceTimer = setTimeout(() => {
@@ -50,12 +49,12 @@ export default defineComponent({
 <template>
   <div class="relative">
     <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-    <input
+    <Input
+      :model-value="localValue"
       type="text"
-      :value="localValue"
       placeholder="Search guitars by model, series, or name..."
-      class="flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-      @input="handleInput"
+      class="pl-10 pr-10"
+      @update:model-value="handleInput"
     />
     <button
       v-if="localValue"

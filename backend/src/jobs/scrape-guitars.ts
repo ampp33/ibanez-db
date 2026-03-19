@@ -10,6 +10,17 @@ import { GuitarService } from '../services/guitar.service';
 import { logger } from '../config/logger';
 import { env } from '../config/env';
 
+/** Extract the original filename from a wiki image URL.
+ * Fandom CDN URLs have the form: /wiki/images/.../Filename.png/revision/latest[/...]
+ * so we look for the path segment that has a known image extension rather than
+ * blindly taking the last segment (which would be "latest").
+ */
+function extractImageName(url: string): string {
+  const parts = new URL(url).pathname.split('/');
+  const namePart = parts.find((p) => /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(p));
+  return decodeURIComponent(namePart ?? parts.pop() ?? 'image.jpg');
+}
+
 /** Download an image from a URL and return the buffer with metadata. */
 async function downloadImage(
   url: string,
@@ -26,27 +37,11 @@ async function downloadImage(
     const arrayBuffer = await response.arrayBuffer();
     const data = Buffer.from(arrayBuffer);
 
-    // Extract original filename from URL (Fandom CDN paths end in /revision/latest/…)
-    const parts = new URL(url).pathname.split('/');
-    const namePart = parts.find((p) => /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(p));
-    const originalName = decodeURIComponent(namePart ?? parts.pop() ?? 'image.jpg');
-
-    return { data, mimeType: contentType, originalName };
+    return { data, mimeType: contentType, originalName: extractImageName(url) };
   } catch (err) {
     logger.warn({ err }, `Failed to download image: ${url}`);
     return null;
   }
-}
-
-/** Extract the original filename from a wiki image URL.
- * Fandom CDN URLs have the form: /wiki/images/.../Filename.png/revision/latest[/...]
- * so we look for the path segment that has a known image extension rather than
- * blindly taking the last segment (which would be "latest").
- */
-function extractImageName(url: string): string {
-  const parts = new URL(url).pathname.split('/');
-  const namePart = parts.find((p) => /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(p));
-  return decodeURIComponent(namePart ?? parts.pop() ?? 'image.jpg');
 }
 
 /** Process a single scraped guitar: upsert DB record and sync images. */
